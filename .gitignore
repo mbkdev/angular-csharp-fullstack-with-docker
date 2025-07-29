@@ -52,3 +52,7 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+src/angular-frontend/.vscode
+src/MyAppBackend/.vs
+src/backend/.vs
+src/frontend/.vscode
