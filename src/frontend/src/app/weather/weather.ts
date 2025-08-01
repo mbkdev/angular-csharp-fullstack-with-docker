@@ -16,7 +16,7 @@ export class Weather implements OnInit {
   constructor(private weatherService: WeatherBackendModel) { }
 
   ngOnInit(): void {
-    this.weatherService.get().subscribe({
+    this.weatherService.getAllWeatherForecasts().subscribe({
       next: data => {
         this.weatherForecasts = data;
         this.error = null;

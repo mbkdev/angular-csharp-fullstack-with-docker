@@ -56,3 +56,6 @@ src/angular-frontend/.vscode
 src/MyAppBackend/.vs
 src/backend/.vs
 src/frontend/.vscode
+src/backend/backend/.vs
+src/backend/backend/appsettings.json
+src/frontend/package-lock.json

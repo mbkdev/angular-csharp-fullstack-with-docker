@@ -28,8 +28,11 @@ export class WeatherBackendModel {
         this.baseUrl = baseUrl ?? "";
     }
 
-    get(): Observable<WeatherForecast[]> {
-        let url_ = this.baseUrl + "/api/WeatherForecast";
+    getWeatherForecastById(id: string): Observable<WeatherForecastDto> {
+        let url_ = this.baseUrl + "/api/WeatherForecast/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -41,20 +44,68 @@ export class WeatherBackendModel {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processGet(response_);
+            return this.processGetWeatherForecastById(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processGet(response_ as any);
+                    return this.processGetWeatherForecastById(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<WeatherForecast[]>;
+                    return _observableThrow(e) as any as Observable<WeatherForecastDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<WeatherForecast[]>;
+                return _observableThrow(response_) as any as Observable<WeatherForecastDto>;
         }));
     }
 
-    protected processGet(response: HttpResponseBase): Observable<WeatherForecast[]> {
+    protected processGetWeatherForecastById(response: HttpResponseBase): Observable<WeatherForecastDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = WeatherForecastDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    getAllWeatherForecasts(): Observable<WeatherForecastDto[]> {
+        let url_ = this.baseUrl + "/all";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllWeatherForecasts(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllWeatherForecasts(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<WeatherForecastDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<WeatherForecastDto[]>;
+        }));
+    }
+
+    protected processGetAllWeatherForecasts(response: HttpResponseBase): Observable<WeatherForecastDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -68,7 +119,7 @@ export class WeatherBackendModel {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(WeatherForecast.fromJS(item));
+                    result200!.push(WeatherForecastDto.fromJS(item));
             }
             else {
                 result200 = <any>null;
@@ -82,15 +133,223 @@ export class WeatherBackendModel {
         }
         return _observableOf(null as any);
     }
+
+    postNewWeatherForecast(weatherForecastDto: CreateWeatherForecastDto): Observable<WeatherForecastDto> {
+        let url_ = this.baseUrl + "/api/WeatherForecast";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(weatherForecastDto);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processPostNewWeatherForecast(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processPostNewWeatherForecast(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<WeatherForecastDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<WeatherForecastDto>;
+        }));
+    }
+
+    protected processPostNewWeatherForecast(response: HttpResponseBase): Observable<WeatherForecastDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = WeatherForecastDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    updateWeatherForecast(id: string | undefined, updateWeatherForecastDto: UpdateWeatherForecastDto): Observable<WeatherForecast> {
+        let url_ = this.baseUrl + "/api/WeatherForecast?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(updateWeatherForecastDto);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdateWeatherForecast(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdateWeatherForecast(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<WeatherForecast>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<WeatherForecast>;
+        }));
+    }
+
+    protected processUpdateWeatherForecast(response: HttpResponseBase): Observable<WeatherForecast> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = WeatherForecast.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    removeWeatherForecast(id: string | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/WeatherForecast?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRemoveWeatherForecast(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processRemoveWeatherForecast(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processRemoveWeatherForecast(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
-export class WeatherForecast implements IWeatherForecast {
+export class WeatherForecastDto implements IWeatherForecastDto {
+    id?: string;
     date?: Date;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string | undefined;
 
-    constructor(data?: IWeatherForecast) {
+    constructor(data?: IWeatherForecastDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
+            this.temperatureC = _data["temperatureC"];
+            this.temperatureF = _data["temperatureF"];
+            this.summary = _data["summary"];
+        }
+    }
+
+    static fromJS(data: any): WeatherForecastDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new WeatherForecastDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["date"] = this.date ? formatDate(this.date) : <any>undefined;
+        data["temperatureC"] = this.temperatureC;
+        data["temperatureF"] = this.temperatureF;
+        data["summary"] = this.summary;
+        return data;
+    }
+}
+
+export interface IWeatherForecastDto {
+    id?: string;
+    date?: Date;
+    temperatureC?: number;
+    temperatureF?: number;
+    summary?: string | undefined;
+}
+
+export class CreateWeatherForecastDto implements ICreateWeatherForecastDto {
+    date?: Date;
+    temperatureC?: number;
+    temperatureF?: number;
+    summary?: string;
+
+    constructor(data?: ICreateWeatherForecastDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -108,9 +367,9 @@ export class WeatherForecast implements IWeatherForecast {
         }
     }
 
-    static fromJS(data: any): WeatherForecast {
+    static fromJS(data: any): CreateWeatherForecastDto {
         data = typeof data === 'object' ? data : {};
-        let result = new WeatherForecast();
+        let result = new CreateWeatherForecastDto();
         result.init(data);
         return result;
     }
@@ -125,11 +384,148 @@ export class WeatherForecast implements IWeatherForecast {
     }
 }
 
-export interface IWeatherForecast {
+export interface ICreateWeatherForecastDto {
+    date?: Date;
+    temperatureC?: number;
+    temperatureF?: number;
+    summary?: string;
+}
+
+export class BaseEntity implements IBaseEntity {
+    id?: string;
+    createdAt?: Date;
+    modifiedAt?: Date;
+
+    constructor(data?: IBaseEntity) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            this.modifiedAt = _data["modifiedAt"] ? new Date(_data["modifiedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BaseEntity {
+        data = typeof data === 'object' ? data : {};
+        let result = new BaseEntity();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["modifiedAt"] = this.modifiedAt ? this.modifiedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBaseEntity {
+    id?: string;
+    createdAt?: Date;
+    modifiedAt?: Date;
+}
+
+export class WeatherForecast extends BaseEntity implements IWeatherForecast {
     date?: Date;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string | undefined;
+
+    constructor(data?: IWeatherForecast) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
+            this.temperatureC = _data["temperatureC"];
+            this.temperatureF = _data["temperatureF"];
+            this.summary = _data["summary"];
+        }
+    }
+
+    static override fromJS(data: any): WeatherForecast {
+        data = typeof data === 'object' ? data : {};
+        let result = new WeatherForecast();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["date"] = this.date ? formatDate(this.date) : <any>undefined;
+        data["temperatureC"] = this.temperatureC;
+        data["temperatureF"] = this.temperatureF;
+        data["summary"] = this.summary;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface IWeatherForecast extends IBaseEntity {
+    date?: Date;
+    temperatureC?: number;
+    temperatureF?: number;
+    summary?: string | undefined;
+}
+
+export class UpdateWeatherForecastDto implements IUpdateWeatherForecastDto {
+    date?: Date;
+    temperatureC?: number;
+    temperatureF?: number;
+    summary?: string;
+
+    constructor(data?: IUpdateWeatherForecastDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
+            this.temperatureC = _data["temperatureC"];
+            this.temperatureF = _data["temperatureF"];
+            this.summary = _data["summary"];
+        }
+    }
+
+    static fromJS(data: any): UpdateWeatherForecastDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateWeatherForecastDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["date"] = this.date ? formatDate(this.date) : <any>undefined;
+        data["temperatureC"] = this.temperatureC;
+        data["temperatureF"] = this.temperatureF;
+        data["summary"] = this.summary;
+        return data;
+    }
+}
+
+export interface IUpdateWeatherForecastDto {
+    date?: Date;
+    temperatureC?: number;
+    temperatureF?: number;
+    summary?: string;
 }
 
 function formatDate(d: Date) {

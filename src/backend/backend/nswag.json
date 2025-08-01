@@ -76,7 +76,7 @@
       "templateDirectory": null,
       "serviceHost": null,
       "serviceSchemes": null,
-      "output": "../frontend/src/app/models/weatherBackendModel.ts",
+      "output": "../../frontend/src/app/models/weatherBackendModel.ts",
       "newLineBehavior": "Auto"
     }
   }
