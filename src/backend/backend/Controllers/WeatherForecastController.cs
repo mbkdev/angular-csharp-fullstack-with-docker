@@ -25,7 +25,7 @@ namespace backend.Controllers
             return Ok(weatherForecast);
         }
 
-        [HttpGet("/all")]
+        [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<WeatherForecastDto>>> GetAllWeatherForecastsAsync()
         {
             var weatherForecasts = await this.weatherForecastService.GetAllWeatherForecastsAsync();

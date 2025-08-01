@@ -80,7 +80,7 @@ export class WeatherBackendModel {
     }
 
     getAllWeatherForecasts(): Observable<WeatherForecastDto[]> {
-        let url_ = this.baseUrl + "/all";
+        let url_ = this.baseUrl + "/api/WeatherForecast/all";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
