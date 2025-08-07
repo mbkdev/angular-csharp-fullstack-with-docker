@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
-import { Weather } from './weather/weather';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Navbar } from './navbar/navbar';
 
 @Component({
   selector: 'app-root',
-  template: '<app-weather></app-weather>',
-  imports: [Weather],
-  standalone: true,
+  imports: [RouterOutlet, Navbar],
+  templateUrl: './app.html',
+  styleUrl: './app.scss'
 })
+
 export class App {
   protected title = 'frontend';
 }

@@ -1,0 +1,55 @@
+<div class="container">
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!error && weatherForecasts.length">
+    <h2>Weather Forecast</h2>
+    <div class="row">
+      <div class="col d-flex gap-1 mb-2">
+        <button class="btn btn-primary" type="button" routerLink="/weather/create">
+          <i class="bi bi-plus"></i>
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th>Datum</th>
+              <th>Temperatur °C</th>
+              <th>Temperatur °F</th>
+              <th>Zusammenfassung</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let forecast of weatherForecasts">
+              <td>{{ forecast.id }}</td>
+              <td>{{ forecast.date|date }}</td>
+              <td>{{ forecast.temperatureC }}</td>
+              <td>{{ forecast.temperatureF }}</td>
+              <td>{{ forecast.summary }}</td>
+              <td>
+                <div class="d-flex gap-2 mb3">
+                  <button class="btn btn-primary btn-custom" routerLink="/weather/edit/{{forecast.id}}">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-primary" (click)="deleteWeatherForecast(forecast.id)">
+                    <i class="bi bi-x-square"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!error && !weatherForecasts.length">
+    <p>No weather data availabe at the moment.</p>
+  </div>
+</div>

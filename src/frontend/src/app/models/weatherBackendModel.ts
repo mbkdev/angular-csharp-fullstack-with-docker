@@ -242,7 +242,7 @@ export class WeatherBackendModel {
         return _observableOf(null as any);
     }
 
-    removeWeatherForecast(id: string | undefined): Observable<void> {
+    removeWeatherForecast(id: string | undefined): Observable<boolean> {
         let url_ = this.baseUrl + "/api/WeatherForecast?";
         if (id === null)
             throw new Error("The parameter 'id' cannot be null.");
@@ -254,6 +254,7 @@ export class WeatherBackendModel {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "application/json"
             })
         };
 
@@ -264,14 +265,14 @@ export class WeatherBackendModel {
                 try {
                     return this.processRemoveWeatherForecast(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<boolean>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<boolean>;
         }));
     }
 
-    protected processRemoveWeatherForecast(response: HttpResponseBase): Observable<void> {
+    protected processRemoveWeatherForecast(response: HttpResponseBase): Observable<boolean> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -280,7 +281,11 @@ export class WeatherBackendModel {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -293,7 +298,7 @@ export class WeatherBackendModel {
 
 export class WeatherForecastDto implements IWeatherForecastDto {
     id?: string;
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string | undefined;
@@ -310,7 +315,7 @@ export class WeatherForecastDto implements IWeatherForecastDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
+            this.date = _data["date"];
             this.temperatureC = _data["temperatureC"];
             this.temperatureF = _data["temperatureF"];
             this.summary = _data["summary"];
@@ -327,7 +332,7 @@ export class WeatherForecastDto implements IWeatherForecastDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        data["date"] = this.date ? formatDate(this.date) : <any>undefined;
+        data["date"] = this.date;
         data["temperatureC"] = this.temperatureC;
         data["temperatureF"] = this.temperatureF;
         data["summary"] = this.summary;
@@ -337,14 +342,14 @@ export class WeatherForecastDto implements IWeatherForecastDto {
 
 export interface IWeatherForecastDto {
     id?: string;
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string | undefined;
 }
 
 export class CreateWeatherForecastDto implements ICreateWeatherForecastDto {
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string;
@@ -360,7 +365,7 @@ export class CreateWeatherForecastDto implements ICreateWeatherForecastDto {
 
     init(_data?: any) {
         if (_data) {
-            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
+            this.date = _data["date"];
             this.temperatureC = _data["temperatureC"];
             this.temperatureF = _data["temperatureF"];
             this.summary = _data["summary"];
@@ -376,7 +381,7 @@ export class CreateWeatherForecastDto implements ICreateWeatherForecastDto {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["date"] = this.date ? formatDate(this.date) : <any>undefined;
+        data["date"] = this.date;
         data["temperatureC"] = this.temperatureC;
         data["temperatureF"] = this.temperatureF;
         data["summary"] = this.summary;
@@ -385,7 +390,7 @@ export class CreateWeatherForecastDto implements ICreateWeatherForecastDto {
 }
 
 export interface ICreateWeatherForecastDto {
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string;
@@ -393,8 +398,8 @@ export interface ICreateWeatherForecastDto {
 
 export class BaseEntity implements IBaseEntity {
     id?: string;
-    createdAt?: Date;
-    modifiedAt?: Date;
+    createdAt?: string;
+    modifiedAt?: string;
 
     constructor(data?: IBaseEntity) {
         if (data) {
@@ -408,8 +413,8 @@ export class BaseEntity implements IBaseEntity {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
-            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
-            this.modifiedAt = _data["modifiedAt"] ? new Date(_data["modifiedAt"].toString()) : <any>undefined;
+            this.createdAt = _data["createdAt"];
+            this.modifiedAt = _data["modifiedAt"];
         }
     }
 
@@ -423,20 +428,20 @@ export class BaseEntity implements IBaseEntity {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
-        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
-        data["modifiedAt"] = this.modifiedAt ? this.modifiedAt.toISOString() : <any>undefined;
+        data["createdAt"] = this.createdAt;
+        data["modifiedAt"] = this.modifiedAt;
         return data;
     }
 }
 
 export interface IBaseEntity {
     id?: string;
-    createdAt?: Date;
-    modifiedAt?: Date;
+    createdAt?: string;
+    modifiedAt?: string;
 }
 
 export class WeatherForecast extends BaseEntity implements IWeatherForecast {
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string | undefined;
@@ -448,7 +453,7 @@ export class WeatherForecast extends BaseEntity implements IWeatherForecast {
     override init(_data?: any) {
         super.init(_data);
         if (_data) {
-            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
+            this.date = _data["date"];
             this.temperatureC = _data["temperatureC"];
             this.temperatureF = _data["temperatureF"];
             this.summary = _data["summary"];
@@ -464,7 +469,7 @@ export class WeatherForecast extends BaseEntity implements IWeatherForecast {
 
     override toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["date"] = this.date ? formatDate(this.date) : <any>undefined;
+        data["date"] = this.date;
         data["temperatureC"] = this.temperatureC;
         data["temperatureF"] = this.temperatureF;
         data["summary"] = this.summary;
@@ -474,14 +479,14 @@ export class WeatherForecast extends BaseEntity implements IWeatherForecast {
 }
 
 export interface IWeatherForecast extends IBaseEntity {
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string | undefined;
 }
 
 export class UpdateWeatherForecastDto implements IUpdateWeatherForecastDto {
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string;
@@ -497,7 +502,7 @@ export class UpdateWeatherForecastDto implements IUpdateWeatherForecastDto {
 
     init(_data?: any) {
         if (_data) {
-            this.date = _data["date"] ? new Date(_data["date"].toString()) : <any>undefined;
+            this.date = _data["date"];
             this.temperatureC = _data["temperatureC"];
             this.temperatureF = _data["temperatureF"];
             this.summary = _data["summary"];
@@ -513,7 +518,7 @@ export class UpdateWeatherForecastDto implements IUpdateWeatherForecastDto {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["date"] = this.date ? formatDate(this.date) : <any>undefined;
+        data["date"] = this.date;
         data["temperatureC"] = this.temperatureC;
         data["temperatureF"] = this.temperatureF;
         data["summary"] = this.summary;
@@ -522,16 +527,10 @@ export class UpdateWeatherForecastDto implements IUpdateWeatherForecastDto {
 }
 
 export interface IUpdateWeatherForecastDto {
-    date?: Date;
+    date?: string;
     temperatureC?: number;
     temperatureF?: number;
     summary?: string;
-}
-
-function formatDate(d: Date) {
-    return d.getFullYear() + '-' + 
-        (d.getMonth() < 9 ? ('0' + (d.getMonth()+1)) : (d.getMonth()+1)) + '-' +
-        (d.getDate() < 10 ? ('0' + d.getDate()) : d.getDate());
 }
 
 export class ApiException extends Error {

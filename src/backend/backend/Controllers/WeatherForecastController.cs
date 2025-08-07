@@ -29,10 +29,6 @@ namespace backend.Controllers
         public async Task<ActionResult<IEnumerable<WeatherForecastDto>>> GetAllWeatherForecastsAsync()
         {
             var weatherForecasts = await this.weatherForecastService.GetAllWeatherForecastsAsync();
-            if (!weatherForecasts.Any())
-            {
-                return new EmptyResult();
-            }
 
             return Ok(weatherForecasts);
         }
@@ -59,9 +55,9 @@ namespace backend.Controllers
         }
 
         [HttpDelete]
-        public async Task RemoveWeatherForecastAsync(Guid id)
+        public async Task<ActionResult<bool>> RemoveWeatherForecastAsync(Guid id)
         {
-            await weatherForecastService.DeleteWeatherForecastAsync(id);
+            return Ok(await weatherForecastService.DeleteWeatherForecastAsync(id));
         }
     }
 }

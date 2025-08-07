@@ -27,14 +27,18 @@ namespace core.Services
             return new WeatherForecastDto(weatherForecast.Id, weatherForecast.Date, weatherForecast.TemperatureC, weatherForecast.TemperatureF, weatherForecast.Summary);
         }
 
-        public async Task DeleteWeatherForecastAsync(Guid id)
+        public async Task<bool> DeleteWeatherForecastAsync(Guid id)
         {
             var weatherForecastToDelete = await this.database.WeatherForecasts.FindAsync(id);
             if (weatherForecastToDelete is not null)
             {
                 this.database.Remove(weatherForecastToDelete);
                 await this.database.SaveChangesAsync();
+
+                return true;
             }
+
+            return false;
         }
 
         public async Task<IEnumerable<WeatherForecastDto>> GetAllWeatherForecastsAsync() =>
