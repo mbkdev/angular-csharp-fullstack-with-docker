@@ -23,7 +23,7 @@ export class Weather implements OnInit {
   }
 
   getAllWeatherForecasts() {
-    this.weatherService.getAllWeatherForecasts().subscribe({
+    this.weatherService.weatherForecast_GetAllWeatherForecasts().subscribe({
       next: data => {
         this.weatherForecasts = data;
         this.error = null;
@@ -35,7 +35,7 @@ export class Weather implements OnInit {
   }
 
   deleteWeatherForecast(weatherForecastId: undefined | string) {
-    this.weatherService.removeWeatherForecast(weatherForecastId).subscribe(x => {
+    this.weatherService.weatherForecast_RemoveWeatherForecast(weatherForecastId).subscribe(x => {
       this.getAllWeatherForecasts();
     });
   }

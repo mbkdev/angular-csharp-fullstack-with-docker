@@ -1,0 +1,21 @@
+<div class="container">
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="loginUser()">
+        <div class="mb-3">
+            <label>Benutzername</label>
+            <input type="text" [(ngModel)]="username" name="date" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Passwort</label>
+            <input type="password" [(ngModel)]="password" name="temperatureC" class="form-control" />
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+            <button type="submit" class="btn btn-primary">Einloggen</button>
+        </div>
+    </form>
+</div>

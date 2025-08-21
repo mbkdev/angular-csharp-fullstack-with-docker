@@ -1,10 +1,11 @@
 ﻿using data.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace data
 {
-    public class BackendDbContext(DbContextOptions<BackendDbContext> options, IConfiguration configuration) : DbContext(options)
+    public class BackendDbContext(DbContextOptions<BackendDbContext> options, IConfiguration configuration) : IdentityDbContext(options)
     {
         private readonly IConfiguration Configuration = configuration;
 

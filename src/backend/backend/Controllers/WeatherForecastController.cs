@@ -28,6 +28,7 @@ namespace backend.Controllers
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<WeatherForecastDto>>> GetAllWeatherForecastsAsync()
         {
+            logger.LogInformation("Maax Test");
             var weatherForecasts = await this.weatherForecastService.GetAllWeatherForecastsAsync();
 
             return Ok(weatherForecasts);

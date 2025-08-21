@@ -9,6 +9,8 @@ import { Navbar } from './navbar/navbar';
   styleUrl: './app.scss'
 })
 
+
+
 export class App {
   protected title = 'frontend';
 }

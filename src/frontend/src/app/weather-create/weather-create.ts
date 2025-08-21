@@ -28,7 +28,7 @@ export class WeatherCreate {
     weatherForecast.temperatureC = this.temperatureC;
     weatherForecast.temperatureF = this.temperatureF;
 
-    this.weatherService.postNewWeatherForecast(weatherForecast).subscribe(); 
+    this.weatherService.weatherForecast_PostNewWeatherForecast(weatherForecast).subscribe(); 
 
     this.router.navigateByUrl('/weather');
   }

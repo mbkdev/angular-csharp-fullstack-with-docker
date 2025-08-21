@@ -25,7 +25,7 @@ export class WeatherEdit {
 
     if (id != null) {
       this.id = id;
-      this.weatherService.getWeatherForecastById(id).subscribe(wf => {
+      this.weatherService.weatherForecast_GetWeatherForecastById(id).subscribe(wf => {
           this.date = wf.date,
           this.summary = wf.summary,
           this.temperatureC = wf.temperatureC,
@@ -44,7 +44,7 @@ export class WeatherEdit {
     updateWeatherForecast.temperatureC = this.temperatureC;
     updateWeatherForecast.temperatureF = this.temperatureF;
 
-    this.weatherService.updateWeatherForecast(this.id, updateWeatherForecast).subscribe();
+    this.weatherService.weatherForecast_UpdateWeatherForecast(this.id, updateWeatherForecast).subscribe();
     this.router.navigateByUrl('/weather');
   }
 }
