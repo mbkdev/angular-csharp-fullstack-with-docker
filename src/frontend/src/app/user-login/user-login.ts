@@ -27,9 +27,6 @@ export class UserLogin {
     inputLoginUserDto.password = this.password;
     inputLoginUserDto.username = this.username;
 
-    console.log(inputLoginUserDto);
-
-
     this.auth.login(this.username!, this.password!).subscribe({
       next: () => {
         this.router.navigate(['/user/overview']); // nach Logout zurück zur Login-Seite
@@ -42,17 +39,6 @@ export class UserLogin {
         }
       }
     });
-
-
-
-    // this.weatherService.user_LoginUser(inputLoginUserDto).subscribe({
-    //   next: (res: any) => {
-    //     console.log(res);
-    //   },
-    //   error: err => {
-    //     console.log(err);
-    //   }
-    // })
   }
 
   logoutUser() {

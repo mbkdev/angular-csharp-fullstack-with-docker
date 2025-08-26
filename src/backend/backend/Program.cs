@@ -48,7 +48,8 @@ builder.Services.AddCors(options =>
         {
             builder.WithOrigins("http://localhost", "http://localhost:4200")
                    .AllowAnyHeader()
-                   .AllowAnyMethod();
+                   .AllowAnyMethod()
+                   .AllowCredentials();
         });
 });
 
@@ -79,6 +80,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddTransient<IWeatherForecastService, WeatherForecastService>();
 builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+builder.Services.AddTransient<IAdministrationService, AdministrationService>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
@@ -93,10 +96,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAngularApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("AllowAngularApp");
 app.MapControllers();
 
 app.Run();

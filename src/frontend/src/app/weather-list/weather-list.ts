@@ -17,8 +17,6 @@ export class Weather implements OnInit {
   constructor(private weatherService: WeatherBackendModel) { }
 
   ngOnInit(): void {
-    console.log("init");
-    
     this.getAllWeatherForecasts();
   }
 

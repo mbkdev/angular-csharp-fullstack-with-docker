@@ -18,6 +18,10 @@ export class Navbar {
     return this.auth.isLoggedIn();
   }
 
+  isAdministrator(): boolean {
+    return this.auth.isAdministrator();
+  }
+
   logout() {
     this.auth.logout();
     this.router.navigate(['/login']); // nach Logout zurück zur Login-Seite

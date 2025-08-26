@@ -1,5 +1,6 @@
 ﻿using core.Enums;
 using core.Exceptions;
+using core.Models;
 using core.Models.Dtos;
 using core.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +15,13 @@ namespace backend.Controllers.Admin
     {
         private readonly ILogger<AdminController> logger;
         private readonly IAuthenticationService authenticationService;
+        private readonly IAdministrationService administrationService;
 
-        public AdminController(ILogger<AdminController> logger, IAuthenticationService authenticationService)
+        public AdminController(ILogger<AdminController> logger, IAuthenticationService authenticationService, IAdministrationService administrationService)
         {
             this.logger = logger;
             this.authenticationService = authenticationService;
+            this.administrationService = administrationService;
         }
 
         [HttpPost("user/create")]
@@ -75,6 +78,15 @@ namespace backend.Controllers.Admin
             var data = HttpContext.User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
             return Ok();
+        }
+
+        [HttpGet("user/list")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.Admin))]
+        public async Task<ActionResult<IEnumerable<OutputUsersWithRolesDto>>> GetAllUsersAsync()
+        {
+            var usersWithRoles = await this.administrationService.GetAllUsersWithRolesAsync();
+
+            return Ok(usersWithRoles);
         }
     }
 }

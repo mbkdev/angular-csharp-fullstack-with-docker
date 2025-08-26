@@ -25,7 +25,6 @@ export class AuthService {
 
 
             if (res) {
-                console.log("res-result: " + res);
                 localStorage.setItem('jwt', res);
             }
         }))

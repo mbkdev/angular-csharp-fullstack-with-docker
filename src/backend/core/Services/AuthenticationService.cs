@@ -1,7 +1,5 @@
 ﻿using core.Enums;
 using core.Exceptions;
-using core.Extensions;
-using core.Models;
 using core.Models.Dtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;

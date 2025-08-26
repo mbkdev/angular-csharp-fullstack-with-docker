@@ -4,7 +4,6 @@ using core.Models.Dtos;
 using core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
 
 namespace backend.Controllers
@@ -15,11 +14,13 @@ namespace backend.Controllers
     {
         private readonly ILogger<UserController> logger;
         private readonly IAuthenticationService authenticationService;
+        private readonly IUserService userService;
 
-        public UserController(ILogger<UserController> logger, IAuthenticationService authenticationService)
+        public UserController(ILogger<UserController> logger, IAuthenticationService authenticationService, IUserService userService)
         {
             this.logger = logger;
             this.authenticationService = authenticationService;
+            this.userService = userService;
         }
 
         [HttpPost("login")]
@@ -30,7 +31,7 @@ namespace backend.Controllers
             try
             {
                 var t = await this.authenticationService.LoginUserAsync(inputLoginUserDto);
-                return Ok(new { t });
+                return Ok(t);
             }
             catch(InvalidEmailOrPasswordException e)
             {
@@ -61,18 +62,22 @@ namespace backend.Controllers
         // Delete Account
         // Change UserData
         // GetUserData
-        [HttpGet("currentUser")]
-        public async Task<ActionResult> GetLoggedInUser()
+
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<ActionResult<OutputUserDto>> GetCurrentUsersProfileAsync()
         {
-            var user = HttpContext.User;
+            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var claims = user.Claims;
+            var userFromService = await this.userService.GetCurrentUserProfileAsync(userId);
 
-            // get claim nameidentifier -> Id
+            var user = new OutputUserDto
+            {
+                Email = userFromService.Email,
+                Username = userFromService.Username
+            };
 
-            var data = HttpContext.User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-
-            return Ok(data);
+            return Ok(user);
         }
     }
 }
