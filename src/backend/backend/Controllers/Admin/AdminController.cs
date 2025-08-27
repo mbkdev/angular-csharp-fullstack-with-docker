@@ -11,37 +11,50 @@ namespace backend.Controllers.Admin
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AdminController : ControllerBase
+    public class AdminController(ILogger<AdminController> logger, IAuthenticationService authenticationService, IAdministrationService administrationService) : ControllerBase
     {
-        private readonly ILogger<AdminController> logger;
-        private readonly IAuthenticationService authenticationService;
-        private readonly IAdministrationService administrationService;
-
-        public AdminController(ILogger<AdminController> logger, IAuthenticationService authenticationService, IAdministrationService administrationService)
-        {
-            this.logger = logger;
-            this.authenticationService = authenticationService;
-            this.administrationService = administrationService;
-        }
+        private readonly ILogger<AdminController> logger = logger;
+        private readonly IAuthenticationService authenticationService = authenticationService;
+        private readonly IAdministrationService administrationService = administrationService;
 
         [HttpPost("user/create")]
         [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.Admin))]
         public async Task<ActionResult> CreateNewUserAsync(InputUserDto inputUserDto)
         {
-            var user = await this.authenticationService.CreateUserAsync(inputUserDto);
+            try
+            {
+                var user = await this.authenticationService.CreateUserAsync(inputUserDto);
 
-
-            return this.Ok(user);
+                return this.Ok(user);
+            }
+            catch (CreateUserException ex)
+            {
+                return this.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("admin/create")]
         [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.Admin))]
         public async Task<ActionResult> CreateNewAdminAsync(InputUserDto inputUserDto)
         {
-            var token = await this.authenticationService.CreateAdministratorAsync(inputUserDto);
+            try
+            {
+                var token = await this.authenticationService.CreateAdministratorAsync(inputUserDto);
 
-
-            return this.Ok(token);
+                return this.Ok(token);
+            }
+            catch (CreateUserException ex)
+            {
+                return this.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("user/delete")]
@@ -54,31 +67,22 @@ namespace backend.Controllers.Admin
 
                 return this.Ok(ok);
             }
-            catch (UserNotFoundException ex)
+            catch (UserNotFoundException)
             {
-                return NotFound(userMailAddress);
+                return this.NotFound(userMailAddress);
             }
             catch (UserDeleteException ex)
             {
-                return BadRequest(ex.Message);
+                return this.BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.BadRequest(ex.Message);
             }
         }
 
-        [HttpPatch("user/update")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<ActionResult> UpdateUserAsync(string userMailAddress, InputUserDto inboundUser)
-        {
-            var currentUser = this.HttpContext.User;
-            var claims = currentUser.Claims;
 
-            var data = HttpContext.User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
-            return Ok();
-        }
 
         [HttpGet("user/list")]
         [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.Admin))]
@@ -86,7 +90,7 @@ namespace backend.Controllers.Admin
         {
             var usersWithRoles = await this.administrationService.GetAllUsersWithRolesAsync();
 
-            return Ok(usersWithRoles);
+            return this.Ok(usersWithRoles);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace core.Extensions
     public static class InputLoginUserDtoExtensions
     {
         public static UserModel ConvertToUserModel(this InputLoginUserDto inputLoginUserDto)
-            => new UserModel
+            => new()
             {
                 Email = inputLoginUserDto.Email,
                 Username = inputLoginUserDto.Username,

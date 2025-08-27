@@ -15,9 +15,5 @@ namespace core.Exceptions
         public InvalidEmailOrPasswordException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected InvalidEmailOrPasswordException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

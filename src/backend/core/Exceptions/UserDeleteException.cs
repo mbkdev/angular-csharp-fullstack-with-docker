@@ -15,9 +15,5 @@ namespace core.Exceptions
         public UserDeleteException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected UserDeleteException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

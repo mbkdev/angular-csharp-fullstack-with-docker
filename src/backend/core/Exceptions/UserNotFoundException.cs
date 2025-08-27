@@ -15,9 +15,5 @@ namespace core.Exceptions
         public UserNotFoundException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected UserNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

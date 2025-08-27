@@ -6,8 +6,8 @@ namespace core.Services
     {
         Task<string> CreateUserAsync(InputUserDto inboundUser);
         Task<string> CreateAdministratorAsync(InputUserDto inboundUser);
+        Task<bool> DeleteUserAsync(string userMailAddress);
         Task<string> LoginUserAsync(InputLoginUserDto userInfo);
         Task LogoutUserAsync();
-        Task<bool> DeleteUserAsync(string userMailAddress);
     }
 }

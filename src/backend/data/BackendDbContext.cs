@@ -12,6 +12,11 @@ namespace data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = this.Configuration.GetConnectionString("DefaultConnection");
+            if (connectionString is null)
+            {
+                throw new Exception("ConnectionString not found");
+            }
+
             optionsBuilder.UseSqlServer(connectionString);
         }
 

@@ -1,4 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 
 namespace core.Exceptions
 {
@@ -16,8 +18,16 @@ namespace core.Exceptions
         {
         }
 
-        protected CreateUserException(SerializationInfo info, StreamingContext context) : base(info, context)
+        public static void ThrowIfNull([NotNull] object? argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
         {
+            if (argument is null)
+            {
+                Throw(paramName);
+            }
         }
+
+        [DoesNotReturn]
+        internal static void Throw(string? paramName) =>
+           throw new CreateUserException(paramName);
     }
 }

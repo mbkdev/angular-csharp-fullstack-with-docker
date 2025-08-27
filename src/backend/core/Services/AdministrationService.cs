@@ -5,36 +5,33 @@ using Microsoft.Extensions.Logging;
 
 namespace core.Services
 {
-    public class AdministrationService : IAdministrationService
+    public class AdministrationService(ILogger<AdministrationService> logger, UserManager<IdentityUser> userManager) : IAdministrationService
     {
-        private readonly ILogger<AdministrationService> logger;
-        private readonly UserManager<IdentityUser> userManager;
-
-        public AdministrationService(ILogger<AdministrationService> logger, UserManager<IdentityUser> userManager)
-        {
-            this.logger = logger;
-            this.userManager = userManager;
-        }
+        private readonly ILogger<AdministrationService> logger = logger;
+        private readonly UserManager<IdentityUser> userManager = userManager;
 
         public async Task<IEnumerable<OutputUsersWithRolesDto>> GetAllUsersWithRolesAsync()
         {
             var allUsers = new List<OutputUsersWithRolesDto>();
 
-            var users = await userManager.Users.ToListAsync();
+            var users = await this.userManager.Users.ToListAsync();
 
-            foreach (var user in users)
+            if (users.Count != 0)
             {
-                var roles = await userManager.GetRolesAsync(user);
-
-                var userWithRoles = new OutputUsersWithRolesDto
+                foreach (var user in users)
                 {
-                    Email = user.Email,
-                    Username = user.UserName,
-                    Roles = [.. roles]
-                };
+                    var roles = await this.userManager.GetRolesAsync(user);
+
+                    var userWithRoles = new OutputUsersWithRolesDto
+                    {
+                        Email = user.Email!,
+                        Username = user.UserName!,
+                        Roles = [.. roles]
+                    };
 
 
-                allUsers.Add(userWithRoles);
+                    allUsers.Add(userWithRoles);
+                }
             }
 
             return allUsers;

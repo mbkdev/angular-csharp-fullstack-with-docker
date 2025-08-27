@@ -19,46 +19,46 @@ namespace backend.Controllers
 
             if (weatherForecast is null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
-            return Ok(weatherForecast);
+            return this.Ok(weatherForecast);
         }
 
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<WeatherForecastDto>>> GetAllWeatherForecastsAsync()
         {
-            logger.LogInformation("Maax Test");
+            this.logger.LogInformation("Maax Test");
             var weatherForecasts = await this.weatherForecastService.GetAllWeatherForecastsAsync();
 
-            return Ok(weatherForecasts);
+            return this.Ok(weatherForecasts);
         }
 
         [HttpPost]
         public async Task<ActionResult<WeatherForecastDto>> PostNewWeatherForecastAsync(CreateWeatherForecastDto weatherForecastDto)
         {
-            var weatherForecast = await weatherForecastService.CreateNewWeatherForecastAsync(weatherForecastDto);
+            var weatherForecast = await this.weatherForecastService.CreateNewWeatherForecastAsync(weatherForecastDto);
 
-            return Ok(weatherForecast);
+            return this.Ok(weatherForecast);
         }
 
         [HttpPut]
         public async Task<ActionResult<WeatherForecast>> UpdateWeatherForecastAsync(Guid id, UpdateWeatherForecastDto updateWeatherForecastDto)
         {
-            var weatherForecast = await weatherForecastService.UpdateWeatherForecastAsync(id, updateWeatherForecastDto);
+            var weatherForecast = await this.weatherForecastService.UpdateWeatherForecastAsync(id, updateWeatherForecastDto);
 
             if (weatherForecast is null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
-            return Ok(weatherForecast);
+            return this.Ok(weatherForecast);
         }
 
         [HttpDelete]
         public async Task<ActionResult<bool>> RemoveWeatherForecastAsync(Guid id)
         {
-            return Ok(await weatherForecastService.DeleteWeatherForecastAsync(id));
+            return this.Ok(await this.weatherForecastService.DeleteWeatherForecastAsync(id));
         }
     }
 }

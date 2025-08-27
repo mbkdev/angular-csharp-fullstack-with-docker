@@ -66,6 +66,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<BackendDbContext>()
     .AddDefaultTokenProviders();
 
+var jwtKey = builder.Configuration["JWT:Key"];
+if (jwtKey is null)
+{
+    throw new Exception("JWT-Key not found");
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -73,7 +79,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero
     }
 );
@@ -83,11 +89,11 @@ builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
 builder.Services.AddTransient<IAdministrationService, AdministrationService>();
 builder.Services.AddTransient<IUserService, UserService>();
 
-using ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
 var app = builder.Build();
 await app.CheckDatabaseActuatlity(app.Logger);
-await app.CreateFirstRunData(app.Logger);
+await app.CreateFirstRunData(app.Logger, builder.Configuration);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

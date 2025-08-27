@@ -10,36 +10,29 @@ namespace backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    public class UserController(ILogger<UserController> logger, IAuthenticationService authenticationService, IUserService userService) : ControllerBase
     {
-        private readonly ILogger<UserController> logger;
-        private readonly IAuthenticationService authenticationService;
-        private readonly IUserService userService;
-
-        public UserController(ILogger<UserController> logger, IAuthenticationService authenticationService, IUserService userService)
-        {
-            this.logger = logger;
-            this.authenticationService = authenticationService;
-            this.userService = userService;
-        }
+        private readonly ILogger<UserController> logger = logger;
+        private readonly IAuthenticationService authenticationService = authenticationService;
+        private readonly IUserService userService = userService;
 
         [HttpPost("login")]
         public async Task<ActionResult<string>> LoginUser(InputLoginUserDto inputLoginUserDto)
         {
-            logger.LogInformation("LoginUser");
 
             try
             {
-                var t = await this.authenticationService.LoginUserAsync(inputLoginUserDto);
-                return Ok(t);
+                var loginToken = await this.authenticationService.LoginUserAsync(inputLoginUserDto);
+
+                return this.Ok(loginToken);
             }
-            catch(InvalidEmailOrPasswordException e)
+            catch (InvalidEmailOrPasswordException)
             {
-                return Unauthorized();
+                return this.Unauthorized();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.BadRequest(ex.Message);
             }
         }
 
@@ -48,14 +41,7 @@ namespace backend.Controllers
         {
             await this.authenticationService.LogoutUserAsync();
 
-            return Ok();
-        }
-
-        [HttpPost("test")]
-        [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
-        public async Task<ActionResult> Test(InputLoginUserDto inputLoginUserDto)
-        {
-            return Ok("Teest");
+            return this.Ok();
         }
 
         // Change Password
@@ -67,17 +53,40 @@ namespace backend.Controllers
         [HttpGet("profile")]
         public async Task<ActionResult<OutputUserDto>> GetCurrentUsersProfileAsync()
         {
-            var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var userFromService = await this.userService.GetCurrentUserProfileAsync(userId);
-
-            var user = new OutputUserDto
+            try
             {
-                Email = userFromService.Email,
-                Username = userFromService.Username
-            };
+                var userId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId is null)
+                {
+                    // Kann das überhaupt sein? Ist ja Authorize Attribut da
+                }
 
-            return Ok(user);
+                var userFromService = await this.userService.GetCurrentUserProfileAsync(userId);
+                if (userFromService is null)
+                {
+                    throw new UserNotFoundException();
+                }
+
+                var user = new OutputUserDto
+                {
+                    Email = userFromService.Email,
+                    Username = userFromService.Username
+                };
+
+                return this.Ok(user);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return this.BadRequest(ex.Message);
+            }
+            catch (UserNotFoundException)
+            {
+                return this.NotFound();
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(ex.Message);
+            }
         }
     }
 }
