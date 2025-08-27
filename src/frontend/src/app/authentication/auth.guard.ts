@@ -11,7 +11,6 @@ export const authGuard: CanActivateFn = () => {
     }
 
     router.navigate(['/login']);
-    console.log("Not Logged In höhöh");
     
     return false;
 }

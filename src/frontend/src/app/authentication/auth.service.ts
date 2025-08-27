@@ -3,7 +3,6 @@ import { InputLoginUserDto, WeatherBackendModel } from "../models/weatherBackend
 import { Injectable } from "@angular/core";
 import { jwtDecode } from 'jwt-decode';
 
-
 @Injectable({ providedIn: 'root' })
 
 export class AuthService {
@@ -16,20 +15,14 @@ export class AuthService {
         inputLoginUserDto.username = username;
         inputLoginUserDto.password = password;
 
-        var res = this.weatherService.user_LoginUser(inputLoginUserDto);
-
-
-
-        var res1 = res.pipe(tap(res => {
-            console.log("res1-result: " + res1);
-
-
+        var loginResponse = this.weatherService.user_LoginUser(inputLoginUserDto);
+        var authenticationResult = loginResponse.pipe(tap(res => {
             if (res) {
                 localStorage.setItem('jwt', res);
             }
         }))
 
-        return res1;
+        return authenticationResult;
     }
 
     logout() {
@@ -40,19 +33,37 @@ export class AuthService {
         return !!localStorage.getItem('jwt');
     }
 
+    isAdministrator(): boolean {
+        return this.hasRole("Admin");
+    }
+
+    hasRole(role: string): boolean {
+        var roles = this.getRole();
+
+        return roles!.includes(role);
+    }
+
     getRole(): string | null {
         const token = this.getToken();
 
-        
         if (!token) return null;
-        
-        const decoded: any = jwtDecode(token);
-        const role_key = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
-        
-        console.log(decoded);
-        
 
-        return decoded[role_key] || null;
+        try {
+            const decoded: any = jwtDecode(token);
+            const roles = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+            var roleArray = [];
+            var isArray = Array.isArray(roles);
+            if (isArray) {
+                roleArray = roles;
+            } else {
+                roleArray = [roles];
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        
+        return roleArray;
     }
 
     getToken(): string | null {
